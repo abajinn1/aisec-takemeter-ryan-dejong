@@ -1,21 +1,53 @@
-# AI Security TakeMeter
+# AI Security Discussion Classifier
 
-Author: Ryan DeJong
+Author: [Ryan DeJong](https://www.linkedin.com/in/ryscde/)
 
-Description: a fine-tuned classifier for AI security engineering discourse.
+## Overview
 
-## Project Summary
+This project is a practical AI security classification study. I built a dataset of public AI security discussions, trained a small machine learning model to sort those discussions into categories, and compared its performance against a stronger AI model used as a baseline.
 
-This project builds a text classifier for public AI Security Engineering discussions. The classifier takes a short post or comment and predicts what type of AI security knowledge the text provides.
+The project focuses on AI security topics, including prompt injection, RAG security, AI agents, red-team testing, tool misuse, guardrails, and security controls.
+
+The goal was to understand how well a trained classifier could recognize different types of AI security discussion, where it made mistakes, and what those mistakes reveal about model behavior, data quality, and label design.
+
+## Skills Demonstrated
+
+This project demonstrates hands-on experience with:
+
+* **AI Security Engineering** - worked with examples involving prompt injection, RAG security, AI agents, tool misuse, guardrail bypasses, red-team testing, and security controls.
+
+* **Machine Learning Model Training** - trained a DistilBERT text classification model to sort AI security discussions into custom categories.
+
+* **Model Evaluation** - measured model performance using accuracy, precision, recall, F1-score, and a confusion matrix.
+
+* **Baseline Testing** - compared the trained model against a stronger AI model that classified the same examples using only instructions, not extra training.
+
+* **Dataset Creation and Labeling** - built a 218-example labeled dataset with text, labels, sources, URLs, and notes explaining the labeling decisions.
+
+* **Data Quality Control** - created and used a Python validation script to check required columns, valid labels, missing values, source URLs, short examples, and duplicate rows.
+
+* **Label Taxonomy Design** - designed clear categories for separating concept explanations, tools or controls, attack/testing tactics, and low-quality discussion.
+
+* **AI Red-Team Thinking** - analyzed examples involving adversarial behavior, prompt injection, unauthorized tool use, guardrail bypasses, and attack/testing methods.
+
+* **Error Analysis** - reviewed incorrect predictions and explained why the model confused certain AI security categories.
+
+* **Python and Colab Workflow** - used Python, Google Colab, and a T4 GPU runtime to validate data, train the model, run evaluations, and export results.
+
+* **Technical Communication** - documented the project clearly for course review, public GitHub portfolio use, and recruiter review.
+
+## How It Works
+
+The classifier takes a short AI security post or comment and predicts what type of information it provides.
 
 The four labels are:
 
-- `concept_definition`
-- `tool_or_control`
-- `attack_or_testing_tactic`
-- `low_signal_or_general`
+* `concept_definition` - explains an AI security concept, risk, or system behavior.
+* `tool_or_control` - discusses a security tool, framework, mitigation, scanner, monitoring method, or control.
+* `attack_or_testing_tactic` - describes an attack method, abuse pattern, red-team test, or misuse scenario.
+* `low_signal_or_general` - covers vague, broad, opinion-based, or low-information discussion.
 
-I created a labeled dataset from public Reddit discussions, validated the CSV locally, fine-tuned a DistilBERT classifier in Google Colab, compared the fine-tuned model against a zero-shot Groq baseline, and analyzed the model’s failure patterns.
+I created a labeled dataset from public Reddit discussions, validated the data locally with a Python script, fine-tuned a DistilBERT classifier in Google Colab, compared it against a stronger AI baseline, and analyzed the model’s failure patterns.
 
 ## Repository Contents
 
@@ -35,7 +67,7 @@ The model training and evaluation were completed in Google Colab using the TakeM
 
 Working notebook:
 
-[TakeMeter_AI_Security_Ryan_DeJong.ipynb](https://colab.research.google.com/drive/1fw7QkeJ-vguZkLPyPlWNrnbBUNcp0slb?usp=sharing)
+[aisec-takemeter-ryan-dejong.ipynb](https://colab.research.google.com/drive/1fw7QkeJ-vguZkLPyPlWNrnbBUNcp0slb?usp=sharing)
 
 Runtime used:
 
