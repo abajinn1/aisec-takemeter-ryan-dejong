@@ -1,1 +1,4 @@
 text,label,source,notes
+"Language models (LLMs), such as those used in AI assistant, have a persistent structural vulnerability because LLMs do not distinguish between what are instructions and what is data.","concept_definition","r/cybersecurity - Are LLMs Fundamentally Vulnerable to Prompt Injection?","Defines prompt injection as a structural issue where instructions and data are not clearly separated"
+"With LLMs, it gets complicated - data is instruction and instruction is data.","concept_definition","r/LocalLLaMA - Do you think prompt injection will ever get solved?","Short concept explanation about why prompt injection is hard to solve"
+"The first layer is LLM firewalls. These sit between the application and the model, inspecting prompts before they are processed and responses before they are delivered.","tool_or_control","r/aisecurity - How to Prevent Prompt Injection in AI","Mentions LLM firewalls as a runtime security control"
