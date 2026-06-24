@@ -63,9 +63,7 @@ I created a labeled dataset from public Reddit discussions, validated the data l
 
 ## Colab Notebook
 
-The model training and evaluation were completed in Google Colab using the TakeMeter starter notebook.
-
-Working notebook:
+The model training and evaluation were completed in Google Colab using the following working notebook:
 
 [aisec-takemeter-ryan-dejong.ipynb](https://colab.research.google.com/drive/1fw7QkeJ-vguZkLPyPlWNrnbBUNcp0slb?usp=sharing)
 
@@ -104,7 +102,7 @@ Example source communities included:
 - `r/MachineLearning`
 - `r/LLM`
 
-This community was a good fit because AI security discussions contain several different types of discourse. Some posts explain concepts, some recommend tools or controls, some describe attacks or testing tactics, and some are broad or low-signal. That made the community appropriate for a multi-class text classification project.
+These are a good fit because AI security discussions contain several different types of discourse. Some posts explain concepts, some recommend tools or controls, some describe attacks or testing tactics, and some are broad or low-signal. That made the community appropriate for a multi-class text classification project.
 
 I used public Reddit discussions only. I did not use private messages, private Discord servers, private forums, or non-public content.
 
@@ -881,7 +879,7 @@ data/labeled_examples.csv
 | Groq baseline accuracy | 0.788 |
 | Difference | Baseline better by 0.333 |
 
-## Final Takeaway
+## Final Thoughts
 
 The Groq baseline outperformed the fine-tuned DistilBERT model. This does not make the project unsuccessful. Instead, it shows that the label taxonomy required nuanced semantic judgment, and a small fine-tuned model with 218 examples was not enough to fully learn those distinctions.
 
