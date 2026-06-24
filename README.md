@@ -535,6 +535,19 @@ The exported `evaluation_results.json` contains the final comparison values:
 
 ## Confusion Matrix
 
+### Confusion Matrix Table
+
+Rows are the true labels. Columns are the model’s predicted labels.
+
+| True Label | Predicted `concept_definition` | Predicted `tool_or_control` | Predicted `attack_or_testing_tactic` | Predicted `low_signal_or_general` |
+|---|---:|---:|---:|---:|
+| `concept_definition` | 5 | 5 | 0 | 0 |
+| `tool_or_control` | 1 | 10 | 0 | 0 |
+| `attack_or_testing_tactic` | 1 | 6 | 0 | 0 |
+| `low_signal_or_general` | 2 | 3 | 0 | 0 |
+
+This table shows the same pattern as the confusion matrix image. The fine-tuned model mostly predicted `concept_definition` and `tool_or_control`. It did not predict `attack_or_testing_tactic` or `low_signal_or_general` on the test set, which explains the low F1-scores for those two labels.
+
 The confusion matrix image is included in this repository:
 
 ```text
@@ -554,6 +567,20 @@ It did not predict:
 - `low_signal_or_general`
 
 This explains the 0.00 F1-scores for those two labels.
+
+## Sample Classifications from the Fine-Tuned Model
+
+The demo cell in the Colab notebook classified five new AI security examples. The table below shows the expected label, predicted label, confidence score, and whether the prediction was correct.
+
+| Example | Expected Label | Predicted Label | Confidence | Correct? | Explanation |
+|---|---|---|---:|---|---|
+| Prompt injection definition | `concept_definition` | `tool_or_control` | 0.360 | No | The text defines prompt injection, but the model over-predicted `tool_or_control`. |
+| Garak and PyRIT tools | `tool_or_control` | `tool_or_control` | 0.349 | Yes | The text names specific tools used for LLM red-team testing, so `tool_or_control` is the correct label. |
+| Malicious instructions in RAG document | `attack_or_testing_tactic` | `tool_or_control` | 0.365 | No | The text describes an attack path, but the model again predicted `tool_or_control`. |
+| Broad AI security statement | `low_signal_or_general` | `concept_definition` | 0.283 | No | The text is broad and does not teach a concrete concept, but the model treated it as a concept definition. |
+| Unauthorized tool-use testing | `attack_or_testing_tactic` | `tool_or_control` | 0.330 | No | The text describes testing for misuse, but the model focused on the words “tool” and “guardrails.” |
+
+This sample classification table supports the demo video requirement because it shows example inputs, predicted labels, confidence scores, and an explanation of one correct and multiple incorrect predictions.
 
 ## Error Analysis
 
@@ -775,35 +802,22 @@ The most useful part of the project was the failure analysis. The confusion matr
 
 The project also showed the value of dataset validation. Small CSV errors, duplicate examples, short rows, or label mismatches can create problems later in the notebook. Building and using a validation script made the project more reliable.
 
-## AI Tool Usage
+## AI Tool Usage and Human Review
 
-I used AI assistance during the project in the following ways:
+I used AI assistance during this project, but I did not accept AI output automatically. I used it as a support tool for brainstorming, drafting, debugging, and analysis, while making the final project decisions myself.
 
-1. **Topic selection**  
-   AI helped me refine the project from general AI security learning into AI Security Engineering discourse classification.
+| Area | How AI Helped | What I Reviewed, Revised, or Overrode |
+|---|---|---|
+| Topic selection | Helped brainstorm possible TakeMeter communities and classification tasks. | I chose AI Security Engineering because it aligned with my cybersecurity and AI interests. |
+| Label taxonomy | Suggested possible label names and edge-case rules. | I revised the labels to avoid vague categories like “good” or “bad” and chose labels tied to AI security knowledge type. |
+| Dataset creation | Helped structure CSV rows and labeling notes. | I reviewed the labels, kept the four-label taxonomy consistent, and used validation checks before training. |
+| Validation script | Helped draft the Python validator. | I tested the script locally and used it repeatedly while expanding the dataset. |
+| Colab notebook workflow | Helped identify which starter notebook cells needed editing. | I ran the notebook myself, confirmed outputs, and used the actual metrics in the README. |
+| Evaluation analysis | Helped interpret the confusion matrix and wrong predictions. | I based the final analysis on the actual model outputs, not on expected or ideal results. |
+| README drafting | Helped organize the final report. | I revised the README to make it clearer for course review, public GitHub use, and recruiter review. |
+| Demo script | Helped turn the project results into a short spoken explanation. | I adjusted the script to sound natural and to explain the project in plain language. |
 
-2. **Label taxonomy design**  
-   AI helped draft and stress-test the four-label taxonomy.
-
-3. **Edge-case reasoning**  
-   AI helped reason through examples that could fit multiple labels.
-
-4. **Dataset workflow**  
-   AI helped design the CSV columns, staging file, and validation workflow.
-
-5. **Validation script**  
-   AI helped create `scripts/validate_dataset.py`.
-
-6. **Colab guidance**  
-   AI helped guide the notebook workflow step by step, including label map setup, dataset upload, tokenization, fine-tuning, baseline evaluation, and export.
-
-7. **Evaluation interpretation**  
-   AI helped interpret the confusion matrix, model comparison, and wrong predictions.
-
-8. **README organization**  
-   AI helped organize the final README into a complete project report.
-
-I did not use AI to replace the project evaluation. I ran the dataset validation, Colab notebook, fine-tuning, baseline comparison, and export steps myself. The final analysis is based on the actual model outputs.
+The most important human decision was keeping the negative result instead of hiding it. The fine-tuned model underperformed the stronger AI baseline, and I documented that honestly because the failure pattern was useful evidence about model reliability.
 
 ## Reproduction Steps
 
@@ -878,6 +892,34 @@ data/labeled_examples.csv
 | Fine-tuned DistilBERT accuracy | 0.455 |
 | Groq baseline accuracy | 0.788 |
 | Difference | Baseline better by 0.333 |
+
+## Spec Reflection
+
+The original project spec required a clear community, 2–4 labels, a 200+ example dataset, a fine-tuning pipeline, a baseline comparison, an evaluation report, and a demo. Building the project against those requirements helped keep the work structured.
+
+The most useful part of the spec was the requirement to define labels before training. That forced me to think carefully about the difference between a concept explanation, a tool/control, an attack/testing tactic, and low-signal discussion. Without that step, it would have been easy to create vague labels that were hard to evaluate.
+
+The baseline comparison was also important. If I only reported the fine-tuned model accuracy, I might have treated 45.5% as the final result without context. Comparing it to the stronger AI baseline showed that the fine-tuned model was not reliable enough yet.
+
+The main thing I would improve in my own spec is the success threshold. I should have stated a concrete target before training, such as: “The fine-tuned model should reach at least 70% accuracy or come within 10 percentage points of the baseline.” My final model did not meet that threshold, but the failure analysis still made the project valuable because it showed where the model broke down.
+
+## Confidence Calibration Reflection
+
+The demo predictions also showed that the fine-tuned model’s confidence scores were low, even when it made a correct prediction.
+
+| Example | Predicted Label | Confidence | Correct? |
+|---|---|---:|---|
+| Prompt injection definition | `tool_or_control` | 0.360 | No |
+| Garak and PyRIT tools | `tool_or_control` | 0.349 | Yes |
+| Malicious RAG instructions | `tool_or_control` | 0.365 | No |
+| Broad AI security statement | `concept_definition` | 0.283 | No |
+| Unauthorized tool-use testing | `tool_or_control` | 0.330 | No |
+
+The model’s confidence scores were clustered between about 0.28 and 0.37. This means the model was not highly confident, even when it selected a label. In a production setting, I would not want this classifier to make automatic decisions at that confidence level.
+
+A practical improvement would be to add a confidence threshold. For example, if the model confidence is below 0.60, the system could send the example to a human reviewer instead of automatically accepting the label.
+
+This would make the classifier safer to use because uncertain predictions would be flagged instead of silently trusted.
 
 ## Final Thoughts
 

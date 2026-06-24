@@ -93,6 +93,17 @@ Accuracy alone is not enough because the model could perform well overall while 
 
 A successful model should perform better than the zero-shot baseline or reveal useful failure patterns. I will consider the project successful if the fine-tuned model improves over the baseline or if the evaluation clearly shows where the label taxonomy, dataset, or model struggled.
 
+## Success Threshold
+
+My target success threshold is:
+
+- Fine-tuned DistilBERT accuracy of at least 70% on the held-out test set, or
+- Fine-tuned DistilBERT performance within 10 percentage points of the Groq baseline.
+
+If the fine-tuned model does not meet this threshold, I will still consider the project useful if the evaluation clearly identifies failure patterns through per-class metrics, wrong predictions, and the confusion matrix.
+
+The reason for this threshold is that a classifier used in a real workflow should perform meaningfully better than random guessing and should be close enough to a strong baseline to justify using a smaller fine-tuned model.
+
 ## AI Tool Usage Plan
 
 I may use AI tools to help stress-test label definitions, identify ambiguous examples, and summarize model failure patterns. I will not use AI to replace my own labeling judgment. Any AI-assisted labeling will be reviewed manually before being included in the final dataset.

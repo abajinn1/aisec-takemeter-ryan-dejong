@@ -1,7 +1,7 @@
+import argparse
 import csv
-from collections import Counter
-
-DATASET_PATH = "data/labeled_examples.csv"
+import sys
+from pathlib import Path
 
 REQUIRED_COLUMNS = ["text", "label", "source", "source_url", "notes"]
 
@@ -13,38 +13,44 @@ ALLOWED_LABELS = {
 }
 
 
-def main():
-    with open(DATASET_PATH, encoding="utf-8-sig", newline="") as file:
-        reader = csv.DictReader(file)
-        rows = list(reader)
-        columns = reader.fieldnames
+def validate_dataset(csv_path, required_columns=None, allowed_labels=None):
+    required_columns = required_columns or REQUIRED_COLUMNS
+    allowed_labels = allowed_labels or ALLOWED_LABELS
 
-    print("Dataset validation report")
-    print("=" * 30)
-    print(f"Total rows: {len(rows)}")
-    print(f"Columns: {columns}")
+    path = Path(csv_path)
+    problems = []
 
-    labels = Counter((row.get("label") or "").strip() for row in rows)
+    if not path.exists():
+        print(f"ERROR: File not found: {path}")
+        return 1
 
-    print("\nLabel distribution:")
-    for label in sorted(ALLOWED_LABELS):
-        print(f"- {label}: {labels.get(label, 0)}")
+    try:
+        with path.open("r", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+    except UnicodeDecodeError:
+        print(f"ERROR: Could not read {path}. File is not valid UTF-8.")
+        return 1
+    except csv.Error as e:
+        print(f"ERROR: CSV parsing failed for {path}: {e}")
+        return 1
+    except OSError as e:
+        print(f"ERROR: Could not open {path}: {e}")
+        return 1
 
-    print("\nProblems found:")
-    problems = 0
+    columns = reader.fieldnames or []
 
-    if columns != REQUIRED_COLUMNS:
-        print(f"- Column mismatch. Expected {REQUIRED_COLUMNS}, got {columns}")
-        problems += 1
+    if columns != required_columns:
+        problems.append(
+            f"Columns do not match expected schema.\n"
+            f"Expected: {required_columns}\n"
+            f"Found:    {columns}"
+        )
 
-    seen_texts = set()
+    seen_text = set()
+    label_counts = {label: 0 for label in sorted(allowed_labels)}
 
-    for line_number, row in enumerate(rows, start=2):
-        extra_values = row.get(None)
-        if extra_values:
-            print(f"- Line {line_number}: extra CSV values found: {extra_values}")
-            problems += 1
-
+    for row_number, row in enumerate(rows, start=2):
         text = (row.get("text") or "").strip()
         label = (row.get("label") or "").strip()
         source = (row.get("source") or "").strip()
@@ -52,43 +58,71 @@ def main():
         notes = (row.get("notes") or "").strip()
 
         if not text:
-            print(f"- Line {line_number}: missing text")
-            problems += 1
+            problems.append(f"Row {row_number}: missing text.")
+        elif len(text.split()) < 5:
+            problems.append(f"Row {row_number}: text is very short: {text}")
 
-        if label not in ALLOWED_LABELS:
-            print(f"- Line {line_number}: invalid label: {label}")
-            problems += 1
+        if label not in allowed_labels:
+            problems.append(f"Row {row_number}: invalid label: {label}")
+        else:
+            label_counts[label] += 1
 
         if not source:
-            print(f"- Line {line_number}: missing source")
-            problems += 1
+            problems.append(f"Row {row_number}: missing source.")
 
         if not source_url:
-            print(f"- Line {line_number}: missing source_url")
-            problems += 1
+            problems.append(f"Row {row_number}: missing source_url.")
         elif not source_url.startswith("https://www.reddit.com/"):
-            print(f"- Line {line_number}: source_url does not look like a Reddit URL: {source_url}")
-            problems += 1
+            problems.append(f"Row {row_number}: source_url is not a Reddit URL: {source_url}")
 
         if not notes:
-            print(f"- Line {line_number}: missing notes")
-            problems += 1
+            problems.append(f"Row {row_number}: missing notes.")
 
-        if text and len(text.split()) < 5:
-            print(f"- Line {line_number}: text may be too short: {text}")
-            problems += 1
-
-        normalized_text = text.lower()
-        if normalized_text in seen_texts:
-            print(f"- Line {line_number}: duplicate text found")
-            problems += 1
+        normalized_text = " ".join(text.lower().split())
+        if normalized_text in seen_text:
+            problems.append(f"Row {row_number}: duplicate text.")
         else:
-            seen_texts.add(normalized_text)
+            seen_text.add(normalized_text)
 
-    if problems == 0:
-        print("No technical problems found.")
-    else:
-        print(f"{problems} possible problem(s) found.")
+    print("Dataset validation report")
+    print("=" * 30)
+    print(f"File: {path}")
+    print(f"Total rows: {len(rows)}")
+    print(f"Columns: {columns}")
+    print()
+
+    print("Label distribution:")
+    for label, count in sorted(label_counts.items()):
+        print(f"- {label}: {count}")
+
+    print()
+    print("Problems found:")
+    if problems:
+        for problem in problems:
+            print(f"- {problem}")
+        return 1
+
+    print("No technical problems found.")
+    return 0
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Validate the TakeMeter labeled dataset before training."
+    )
+    parser.add_argument(
+        "csv_path",
+        nargs="?",
+        default="data/labeled_examples.csv",
+        help="Path to the CSV dataset. Defaults to data/labeled_examples.csv.",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    exit_code = validate_dataset(args.csv_path)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
